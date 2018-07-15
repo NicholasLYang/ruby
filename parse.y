@@ -878,6 +878,7 @@ static void token_info_warn(struct parser_params *p, const char *token, token_in
 %token tCOLON3		":: at EXPR_BEG"
 %token <id> tOP_ASGN	/* +=, -=  etc. */
 %token tASSOC		"=>"
+%token tCOLON		":"
 %token tLPAREN		"("
 %token tLPAREN_ARG	"( arg"
 %token tRPAREN		")"
@@ -904,7 +905,7 @@ static void token_info_warn(struct parser_params *p, const char *token, token_in
 %nonassoc keyword_defined
 %right '=' tOP_ASGN
 %left modifier_rescue
-%right '?' ':'
+%right '?' tCOLON
 %nonassoc tDOT2 tDOT3
 %left  tOROP
 %left  tANDOP
@@ -2039,7 +2040,7 @@ arg		: lhs '=' arg_rhs
 			p->in_defined = 0;
 			$$ = new_defined(p, $4, &@$);
 		    }
-		| arg '?' arg opt_nl ':' arg
+		| arg '?' arg opt_nl tCOLON arg
 		    {
 		    /*%%%*/
 			value_expr($1);
@@ -4003,6 +4004,7 @@ f_norm_arg	: f_bad_arg
 			formal_argument(p, get_id($1));
 			$$ = $1;
 		    }
+                | tIDENTIFIER tCOLON type_sig
 		;
 
 f_arg_asgn	: f_norm_arg
@@ -4322,6 +4324,8 @@ assocs		: assoc
 		    /*% ripper: rb_ary_push($1, get_value($3)) %*/
 		    }
 		;
+type_sig        : cname
+                | tCONSTANT tCOLON2 type_sig
 
 assoc		: arg_value tASSOC arg_value
 		    {
@@ -8086,7 +8090,7 @@ parser_yylex(struct parser_params *p)
 	    pushback(p, c);
 	    c = warn_balanced(':', ":", "symbol literal");
 	    SET_LEX_STATE(EXPR_BEG);
-	    return c;
+	    return tCOLON;
 	}
 	switch (c) {
 	  case '\'':
