@@ -3859,6 +3859,15 @@ f_arglist	: '(' f_args rparen
 			SET_LEX_STATE(EXPR_BEG);
 			p->command_start = TRUE;
 		    }
+		|  '(' f_args rparen tASSOC type_sig keyword_do
+		    {
+		    /*%%%*/
+			$$ = $2;
+		    /*% %*/
+		    /*% ripper: paren!($2) %*/
+			SET_LEX_STATE(EXPR_BEG);
+			p->command_start = TRUE;
+		    }
 		|   {
 			$<num>$ = p->in_kwarg;
 			p->in_kwarg = 1;
