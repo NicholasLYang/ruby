@@ -212,6 +212,7 @@ static const struct token_assoc {
     {tBACK_REF,			O(backref)},
     {tCHAR,			O(CHAR)},
     {tCMP,			O(op)},
+    {tCOLON,			O(op)},
     {tCOLON2,			O(op)},
     {tCOLON3,			O(op)},
     {tCONSTANT,			O(const)},
