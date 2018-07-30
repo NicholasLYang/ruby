@@ -834,7 +834,7 @@ static void token_info_warn(struct parser_params *p, const char *token, token_in
 %type <node> command_rhs arg_rhs
 %type <node> command_asgn mrhs mrhs_arg superclass block_call block_command
 %type <node> f_block_optarg f_block_opt
-%type <node> f_arglist f_args f_arg f_arg_item f_optarg f_marg f_marg_list f_margs
+%type <node> f_arglist f_args f_arg f_arg_item f_optarg f_marg f_marg_list f_margs type_sig
 %type <node> assoc_list assocs assoc undef_list backref string_dvar for_var
 %type <node> block_param opt_block_param block_param_def f_opt
 %type <node> f_kwarg f_kw f_block_kwarg f_block_kw
@@ -3059,7 +3059,7 @@ opt_block_param	: none
 		    }
 		;
 
-block_param_def	: '|' opt_bv_decl '|'
+block_param_def	: '|' opt_bv_decl '|' opt_return_type_sig
 		    {
 			p->cur_arg = 0;
 		    /*%%%*/
@@ -3074,7 +3074,7 @@ block_param_def	: '|' opt_bv_decl '|'
 		    /*% %*/
 		    /*% ripper: block_var!(params_new(Qnil,Qnil,Qnil,Qnil,Qnil,Qnil,Qnil), Qnil) %*/
 		    }
-		| '|' block_param opt_bv_decl '|'
+		| '|' block_param opt_bv_decl '|' opt_return_type_sig
 		    {
 			p->cur_arg = 0;
 		    /*%%%*/
@@ -3850,25 +3850,21 @@ superclass	: '<'
 		    }
 		;
 
+
 f_arglist	: '(' f_args rparen
 		    {
-		    /*%%%*/
-			$$ = $2;
-		    /*% %*/
-		    /*% ripper: paren!($2) %*/
-			SET_LEX_STATE(EXPR_BEG);
-			p->command_start = TRUE;
+		      SET_LEX_STATE(EXPR_BEG);
+		      p->command_start = TRUE;
 		    }
-		|  '(' f_args rparen tASSOC type_sig keyword_do
+                    opt_return_type_sig
 		    {
 		    /*%%%*/
 			$$ = $2;
 		    /*% %*/
 		    /*% ripper: paren!($2) %*/
-			SET_LEX_STATE(EXPR_BEG);
-			p->command_start = TRUE;
 		    }
-		|   {
+
+                |  {
 			$<num>$ = p->in_kwarg;
 			p->in_kwarg = 1;
 			SET_LEX_STATE(p->lex.state|EXPR_LABEL); /* force for args */
@@ -4334,7 +4330,17 @@ assocs		: assoc
 		    }
 		;
 type_sig        : cname
+                   {
+                     /*% ripper: type_sig_new!($1) %*/  
+                   }
                 | tCONSTANT tCOLON2 type_sig
+		{
+		  /*% ripper: comb_type_sig!($1, $3) %*/  
+		}
+
+opt_return_type_sig  : none
+                     | tASSOC type_sig
+                     ;
 
 assoc		: arg_value tASSOC arg_value
 		    {
