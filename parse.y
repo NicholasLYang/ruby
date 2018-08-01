@@ -1717,21 +1717,21 @@ cpath		: tCOLON3 cname
 		    /*%%%*/
 			$$ = NEW_COLON3($2, &@$);
 		    /*% %*/
-		    /*% ripper: top_const_ref!($2) %*/
+		    /*% ripper: top_const_field!($2) %*/
 		    }
 		| cname
 		    {
 		    /*%%%*/
 			$$ = NEW_COLON2(0, $$, &@$);
 		    /*% %*/
-		    /*% ripper: const_ref!($1) %*/
+		    /*% ripper: const_field!($1) %*/
 		    }
 		| primary_value tCOLON2 cname
 		    {
 		    /*%%%*/
 			$$ = NEW_COLON2($1, $3, &@$);
 		    /*% %*/
-		    /*% ripper: const_path_ref!($1, $3) %*/
+		    /*% ripper: const_path_field!($1, $3) %*/
 		    }
 		;
 
@@ -4331,12 +4331,17 @@ assocs		: assoc
 		;
 type_sig        : cname
                    {
-                     /*% ripper: type_sig_new!($1) %*/  
+                     /*% ripper: const_field!($1) %*/  
                    }
                 | tCONSTANT tCOLON2 type_sig
 		{
-		  /*% ripper: comb_type_sig!($1, $3) %*/  
+		  /*% ripper: const_path_field!($1, $3) %*/  
 		}
+                | tCOLON3 type_sig
+		{
+		  /*% ripper: top_const_field!($2) %*/  
+		}
+                ;
 
 opt_return_type_sig  : none
                      | tASSOC type_sig
